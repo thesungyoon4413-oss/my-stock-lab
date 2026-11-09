@@ -1,4 +1,5 @@
-import {validateBrokerHistory} from './broker.js?v=2.1.0';
+import {validateEvidence} from './research.js?v=2.2.0';
+import {validateBrokerHistory} from './broker.js?v=2.2.0';
 export const empty=()=>({version:1,holdings:[],trades:[],dividends:[],reports:[],recommendations:[],quotes:[],fx:null,cash:null,logs:[]});
 export const known=v=>typeof v==='number'&&Number.isFinite(v);
 export const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -31,13 +32,14 @@ function bytes64(a){let s='';for(let i=0;i<a.length;i+=8192)s+=String.fromCharCo
 export async function decrypt(v,password){if(v.format!=='MY-STOCK-LAB-AES256'||v.version!==1||typeof v.data!=='string'||v.data.length>14000000)throw Error('잘못된 백업');const salt=un64(v.salt),key=await derive(password,salt);const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:un64(v.iv)},key,un64(v.data));return {db:validateDB(JSON.parse(new TextDecoder().decode(raw))),key,salt};}
 
 function validateExtensions(d,fail){
- try{validateBrokerHistory(d.brokerSnapshots);}catch{fail();}
+ try{validateBrokerHistory(d.brokerSnapshots);for(const r of d.reports)if(r.evidenceSnapshot!==undefined)validateEvidence(r.evidenceSnapshot,r.market,r.date);}catch{fail();}
  const str=v=>typeof v==='string'&&v.length<2000000,optionalNumber=v=>v===null||known(v);
  if(d.preferences!==undefined&&(!d.preferences||typeof d.preferences.autoRefresh!=='boolean'||typeof d.preferences.reportOnOpen!=='boolean'))fail();
  if(d.providers!==undefined){if(!d.providers||typeof d.providers!=='object')fail();for(const id of ['av','fsc']){const p=d.providers[id];if(!p||!str(p.key)||p.key.length>256||typeof p.accepted!=='boolean'||!Array.isArray(p.attempts)||p.attempts.length>1000||p.attempts.some(t=>!known(t))||!p.fetched||typeof p.fetched!=='object')fail();if(Object.values(p.fetched).some(v=>!validDate(v)))fail();if(p.cooldownUntil!==undefined&&(!known(p.cooldownUntil)||p.cooldownUntil<0))fail();}}
  if(d.etfFacts!==undefined){if(!Array.isArray(d.etfFacts)||d.etfFacts.length>100000)fail();for(const f of d.etfFacts){if(!str(f.id)||!str(f.symbol)||!validDate(f.date)||!str(f.source)||!str(f.rocSource)||!str(f.note)||!['nav','underlyingPrice','distributionRate','rocPercent'].every(k=>optionalNumber(f[k])&&(f[k]===null||f[k]>=0))||(f.rocPercent!==null&&(f.rocPercent>100||!f.rocSource))||(f.exDate&&!validDate(f.exDate))||(f.payDate&&!validDate(f.payDate)))fail();}}
  if(d.researchCandidates!==undefined){if(!Array.isArray(d.researchCandidates)||d.researchCandidates.length>100000)fail();for(const r of d.researchCandidates){if(!str(r.id)||!str(r.name)||!str(r.symbol)||!['KR','US'].includes(r.market)||!['KRW','USD'].includes(r.currency)||!validDate(r.priceDate)||!validDate(r.fiscalDate)||!str(r.source)||!str(r.business)||!str(r.catalysts)||!str(r.risks)||!str(r.failure)||!['price','revenue','revenueGrowth','operatingProfit','profitGrowth','per','pbr','roe','debtRatio'].every(k=>optionalNumber(r[k])))fail();}}
  for(const h of d.holdings){if(h.inventory){const b=h.inventory;if(!validDate(b.date)||!known(b.qty)||b.qty<0||!optionalNumber(b.avg)||(b.avg!==null&&b.avg<=0)||!str(b.source))fail();}if(h.fullHistoryConfirmed!==undefined&&typeof h.fullHistoryConfirmed!=='boolean')fail();}
+ for(const v of d.dividends)if((v.status!==undefined&&!['paid','scheduled'].includes(v.status))||(v.paymentId!==undefined&&(!str(v.paymentId)||v.paymentId.length>150))||(v.source!==undefined&&(!str(v.source)||v.source.length>1000))||(v.fx!==null&&v.fx<=0))fail();
  for(const t of d.trades)if(t.calculatedRealized!==undefined&&!optionalNumber(t.calculatedRealized))fail();
  for(const r of d.recommendations)if(r.benchmarkSymbol!==undefined&&!str(r.benchmarkSymbol))fail();
 }

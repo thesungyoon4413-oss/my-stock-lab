@@ -56,3 +56,5 @@
 .research-title{margin:20px 22px}.research-title+p{margin:18px 22px}
 .broker-stats{padding:0 22px;grid-template-columns:repeat(3,minmax(0,1fr))}.broker-stats .stat{padding:16px;min-width:0}.broker-stats .stat strong{font-size:23px}.broker-file-input{display:none}.panel>h3{margin:18px 22px}@media(max-width:760px){.broker-stats{grid-template-columns:1fr;padding:0 16px;gap:10px}.broker-stats .stat strong{font-size:24px}}@media(min-width:761px) and (max-width:1024px){.broker-stats .stat strong{font-size:21px}}
 .broker-note{margin-top:9px;padding-top:8px;border-top:1px dashed var(--line);white-space:normal;color:#a7b8c8}
+
+.evidence-links a{overflow-wrap:anywhere}.evidence-links small{display:block;color:var(--muted);margin-top:.3rem}details summary{cursor:pointer;padding:12px 0}dialog details pre{max-height:45vh;overflow:auto}
