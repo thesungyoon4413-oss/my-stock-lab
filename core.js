@@ -1,8 +1,8 @@
 export const empty=()=>({version:1,holdings:[],trades:[],dividends:[],reports:[],recommendations:[],quotes:[],fx:null,cash:null,logs:[]});
 export const known=v=>typeof v==='number'&&Number.isFinite(v);
 export const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-export function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(s)&&new Date(s+'T00:00:00Z').toISOString().slice(0,10)===s;}
-export function quote(db,h){return db.quotes.filter(q=>q.symbol===h.symbol&&q.currency===h.currency).sort((a,b)=>b.date.localeCompare(a.date))[0];}
+export function validDate(s){if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;const d=new Date(s+'T00:00:00Z');return Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===s;}
+export function quote(db,h){return db.quotes.filter(q=>q.symbol===h.symbol&&q.currency===h.currency).sort((a,b)=>b.date.localeCompare(a.date)||(b.updated||'').localeCompare(a.updated||''))[0];}
 export function valuation(db,h){let q=quote(db,h), rate=h.currency==='KRW'?1:db.fx?.rate;let native=q&&h.verified!==false?q.price*h.qty:null;return {q,native,value:known(native)&&known(rate)?native*rate:null,pnl:known(native)&&known(h.avg)&&known(rate)?(q.price-h.avg)*h.qty*rate:null,ret:known(native)&&h.avg>0?(q.price/h.avg-1)*100:null};}
 export function total(db,market){const hs=db.holdings.filter(h=>h.qty>0&&(!market||h.market===market));const vs=hs.map(h=>valuation(db,h));return {value:vs.reduce((s,v)=>s+(v.value??0),0),pnl:vs.reduce((s,v)=>s+(v.pnl??0),0),priced:vs.filter(v=>known(v.value)).length,costed:vs.filter(v=>known(v.pnl)).length,count:hs.length};}
 export function krw(amount,currency,fx){return currency==='KRW'?amount:known(fx)?amount*fx:null;}
@@ -21,10 +21,21 @@ for(const t of d.trades)if(!str(t.id)||!str(t.symbol)||!(t.date===''||validDate(
 for(const r of d.reports)if(!str(r.id)||!str(r.title)||!str(r.body)||!str(r.source)||!str(r.created)||!validDate(r.date)||!['KR','US'].includes(r.market))fail();
 for(const r of d.recommendations){if(!str(r.id)||!str(r.name)||!str(r.symbol)||!str(r.reason)||!str(r.source)||!validDate(r.date)||!cur(r.currency)||!known(r.price)||r.price<=0||!nullable(r.benchmark)||!['단기','중기','장기'].includes(r.horizon)||!Array.isArray(r.revisions)||!Array.isArray(r.observations))fail();for(const o of r.observations)if(!validDate(o.date)||!known(o.price)||o.price<=0||!nullable(o.benchmark)||!str(o.source))fail();for(const v of r.revisions)if(!str(v.date)||!str(v.reason))fail();}
 for(const v of d.dividends)if(!str(v.id)||!str(v.symbol)||!validDate(v.date)||!cur(v.currency)||!known(v.gross)||!known(v.tax)||v.gross<0||v.tax<0||v.tax>v.gross||!nullable(v.fx))fail();
-if(d.fx!==null&&(!known(d.fx?.rate)||d.fx.rate<=0||!validDate(d.fx.date)||!str(d.fx.source)||!str(d.fx.updated)))fail();if(!nullable(d.cash))fail();for(const l of d.logs)if(!str(l.date)||!str(l.message))fail();return d;
+if(d.fx!==null&&(!known(d.fx?.rate)||d.fx.rate<=0||!validDate(d.fx.date)||!str(d.fx.source)||!str(d.fx.updated)))fail();if(!nullable(d.cash))fail();validateExtensions(d,fail);for(const l of d.logs)if(!str(l.date)||!str(l.message))fail();return d;
 }
 export async function derive(password,salt){const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:310000,hash:'SHA-256'},material,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
 const b64=a=>btoa(String.fromCharCode(...a));const un64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 export async function encrypt(db,key,salt){const iv=crypto.getRandomValues(new Uint8Array(12));const data=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(db))));return {format:'MY-STOCK-LAB-AES256',version:1,salt:b64(salt),iv:b64(iv),data:bytes64(data)};}
 function bytes64(a){let s='';for(let i=0;i<a.length;i+=8192)s+=String.fromCharCode(...a.subarray(i,i+8192));return btoa(s);}
 export async function decrypt(v,password){if(v.format!=='MY-STOCK-LAB-AES256'||v.version!==1||typeof v.data!=='string'||v.data.length>14000000)throw Error('잘못된 백업');const salt=un64(v.salt),key=await derive(password,salt);const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:un64(v.iv)},key,un64(v.data));return {db:validateDB(JSON.parse(new TextDecoder().decode(raw))),key,salt};}
+
+function validateExtensions(d,fail){
+ const str=v=>typeof v==='string'&&v.length<2000000,optionalNumber=v=>v===null||known(v);
+ if(d.preferences!==undefined&&(!d.preferences||typeof d.preferences.autoRefresh!=='boolean'||typeof d.preferences.reportOnOpen!=='boolean'))fail();
+ if(d.providers!==undefined){if(!d.providers||typeof d.providers!=='object')fail();for(const id of ['av','fsc']){const p=d.providers[id];if(!p||!str(p.key)||p.key.length>256||typeof p.accepted!=='boolean'||!Array.isArray(p.attempts)||p.attempts.length>1000||p.attempts.some(t=>!known(t))||!p.fetched||typeof p.fetched!=='object')fail();if(Object.values(p.fetched).some(v=>!validDate(v)))fail();}}
+ if(d.etfFacts!==undefined){if(!Array.isArray(d.etfFacts)||d.etfFacts.length>100000)fail();for(const f of d.etfFacts){if(!str(f.id)||!str(f.symbol)||!validDate(f.date)||!str(f.source)||!str(f.rocSource)||!str(f.note)||!['nav','underlyingPrice','distributionRate','rocPercent'].every(k=>optionalNumber(f[k])&&(f[k]===null||f[k]>=0))||(f.rocPercent!==null&&(f.rocPercent>100||!f.rocSource))||(f.exDate&&!validDate(f.exDate))||(f.payDate&&!validDate(f.payDate)))fail();}}
+ if(d.researchCandidates!==undefined){if(!Array.isArray(d.researchCandidates)||d.researchCandidates.length>100000)fail();for(const r of d.researchCandidates){if(!str(r.id)||!str(r.name)||!str(r.symbol)||!['KR','US'].includes(r.market)||!['KRW','USD'].includes(r.currency)||!validDate(r.priceDate)||!validDate(r.fiscalDate)||!str(r.source)||!str(r.business)||!str(r.catalysts)||!str(r.risks)||!str(r.failure)||!['price','revenue','revenueGrowth','operatingProfit','profitGrowth','per','pbr','roe','debtRatio'].every(k=>optionalNumber(r[k])))fail();}}
+ for(const h of d.holdings){if(h.inventory){const b=h.inventory;if(!validDate(b.date)||!known(b.qty)||b.qty<0||!optionalNumber(b.avg)||(b.avg!==null&&b.avg<=0)||!str(b.source))fail();}if(h.fullHistoryConfirmed!==undefined&&typeof h.fullHistoryConfirmed!=='boolean')fail();}
+ for(const t of d.trades)if(t.calculatedRealized!==undefined&&!optionalNumber(t.calculatedRealized))fail();
+ for(const r of d.recommendations)if(r.benchmarkSymbol!==undefined&&!str(r.benchmarkSymbol))fail();
+}
