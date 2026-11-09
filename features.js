@@ -1,9 +1,10 @@
-import {known,today,validDate,quote,krw,parseCSV} from './core.js';
-import {RELEASE,normalize,requestBudget,replayInventory,effectiveRealized,totalReturn,dividendSummary,autoObserve,buildReport,importBalances,fscQuotes,upsertQuote,invalidateInventory,rankResearch} from './lab.js';
-import {refreshQuotes,PROVIDER_INFO} from './providers.js';
+import {createSnapshotUI} from './snapshot-ui.js?v=2.1.0';
+import {known,today,validDate,quote,krw,parseCSV} from './core.js?v=2.1.0';
+import {RELEASE,normalize,requestBudget,replayInventory,effectiveRealized,totalReturn,dividendSummary,autoObserve,buildReport,importBalances,fscQuotes,upsertQuote,invalidateInventory,rankResearch} from './lab.js?v=2.1.0';
+import {refreshQuotes,PROVIDER_INFO} from './providers.js?v=2.1.0';
 export function createFeatures(c){
  const {esc,n,money,pct,button,panel,table,td,input,num,select,area,modal,toast,download}=c;
- const db=()=>normalize(c.getDB());let updating=false;
+ const db=()=>normalize(c.getDB());let updating=false;const snapshots=createSnapshotUI(c);
  const check=(label,name,value=false)=>`<label class="check-label"><input type="checkbox" name="${name}" ${value?'checked':''}>${label}</label>`;
  const optional=s=>s===''||s===undefined?null:Number(s);
  function settings(){
@@ -37,6 +38,7 @@ export function createFeatures(c){
  function researchForm(id){const old=db().researchCandidates.find(x=>x.id===id)||{};modal('연구 대상·재무 근거 등록',input('기업명','name',old.name,'text',true)+input('종목코드','symbol',old.symbol,'text',true)+select('시장','market',[['KR','국내'],['US','미국']],old.market||'US')+num('확인한 주가 (국내 KRW / 미국 USD)','price',old.price,true)+input('가격 거래일','priceDate',old.priceDate||today(),'date',true)+input('재무자료 기준 결산일','fiscalDate',old.fiscalDate||'','date',true)+input('공식자료 출처 URL·자료명','source',old.source,'text',true)+num('최근 매출 (단위는 아래 근거에 기재)','revenue',old.revenue)+num('매출 성장률 %','revenueGrowth',old.revenueGrowth)+num('영업이익 (매출과 같은 단위)','operatingProfit',old.operatingProfit)+num('영업이익 성장률 %','profitGrowth',old.profitGrowth)+num('PER','per',old.per)+num('PBR','pbr',old.pbr)+num('ROE %','roe',old.roe)+num('부채비율 %','debtRatio',old.debtRatio)+area('경쟁력·경쟁사 밸류에이션·수치 단위·근거','business',old.business)+area('3~12개월 촉매','catalysts',old.catalysts,true)+area('위험·추천하지 않는 이유','risks',old.risks,true)+area('실패 조건','failure',old.failure,true),async f=>{if(!validDate(f.priceDate)||!validDate(f.fiscalDate)||f.priceDate>today()||f.fiscalDate>today()||!(Number(f.price)>0))throw Error('가격·기준일을 확인하세요');const item={...f,id:id||crypto.randomUUID(),symbol:f.symbol.trim().toUpperCase(),currency:f.market==='KR'?'KRW':'USD',updated:new Date().toISOString()};for(const k of ['price','revenue','revenueGrowth','operatingProfit','profitGrowth','per','pbr','roe','debtRatio']){item[k]=optional(f[k]);if(item[k]!==null&&!known(item[k]))throw Error('재무 숫자 오류');}const d=db();if(d.researchCandidates.some(x=>x.symbol===item.symbol&&x.id!==id))throw Error('이미 있는 연구 대상입니다');if(id)d.researchCandidates=d.researchCandidates.map(x=>x.id===id?item:x);else d.researchCandidates.push(item);await c.commit();});}
  function freezeResearch(id){const d=db(),r=rankResearch(d).all.find(r=>r.id===id);if(!r?.eligible||r.held)throw Error('신규 연구 후보 조건을 먼저 충족해야 합니다');modal('연구 후보를 최초 추천 기록으로 고정',`<p>${esc(r.name)} · ${r.score}/5 · ${esc(r.source)}<br>이 기록은 가상 추천 성과로 추적하며 실제 매수하지 않습니다.</p>`,async()=>{if(d.recommendations.filter(x=>x.date===today()&&x.currency===r.currency).length>=2)throw Error('같은 날 시장별 추천은 최대 2개입니다');const reason=`규칙형 연구 후보 (AI 생성 아님)\n재무 기준 ${r.fiscalDate} · 가격 기준 ${r.priceDate}\n출처 ${r.source}\n점수 ${r.score}/5\n${r.criteria.map(x=>x.label+': '+(x.pass?'충족':'미충족')).join('\n')}\n사업·경쟁사: ${r.business||'미확인'}\n촉매: ${r.catalysts}\n위험: ${r.risks}\n실패 조건: ${r.failure}\n매수 구간: 근거 자료 없어 미확인`;d.recommendations.push({id:crypto.randomUUID(),name:r.name,symbol:r.symbol,date:today(),price:r.price,priceDate:r.priceDate,currency:r.currency,benchmark:null,source:r.source,horizon:'중기',reason,observations:[],revisions:[],created:new Date().toISOString(),researchSnapshot:structuredClone(r)});await c.commit();},'확인 후 최초 기록 저장');}
  async function handle(act,id){
+  if(await snapshots.handle(act,id))return true;
   if(act==='research')researchForm(id);else if(act==='research-freeze')freezeResearch(id);else if(act==='provider-settings')providerForm();else if(act==='quotes-update')await updateQuotes();else if(act==='automation-settings')automationForm();else if(act==='automation-run'){await automation();toast('조건 점검 완료 · 시세·설정 조건을 충족한 보고서만 저장합니다');}
   else if(act==='baseline')baselineForm(id);else if(act==='reconcile')reconcileForm(id);else if(act==='balance-import')balances();
   else if(act==='balance-template')download('balances-template.csv','\uFEFFsymbol,name,market,currency,qty,avg,verified\n','text/csv;charset=utf-8');
@@ -48,5 +50,5 @@ export function createFeatures(c){
   else if(act==='change-password')c.changePassword();
   else return false;return true;
  }
- return {settings,inventoryPanel,etfPanel,dividendPanel,reportSummary,ideasPanel,handle,ruleForm,automation,normalize,release:RELEASE};
+ return {settings:()=>settings()+snapshots.settings(),snapshotDashboard:snapshots.dashboard,brokerNote:snapshots.holdingNote,snapshotFile:snapshots.fileSelected,inventoryPanel,etfPanel,dividendPanel,reportSummary,ideasPanel,handle,ruleForm,automation,normalize,release:RELEASE};
 }

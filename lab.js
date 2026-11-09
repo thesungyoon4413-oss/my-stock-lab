@@ -1,5 +1,5 @@
-import {known,today,validDate,quote,valuation,krw} from './core.js';
-export const RELEASE='2.0.1';
+import {known,today,validDate,quote,valuation,krw} from './core.js?v=2.1.0';
+export const RELEASE='2.1.0';
 export function normalize(db){
  db.preferences??={autoRefresh:false,reportOnOpen:false};
  db.providers??={};

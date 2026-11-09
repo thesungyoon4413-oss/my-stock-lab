@@ -1,3 +1,4 @@
+import {validateBrokerHistory} from './broker.js?v=2.1.0';
 export const empty=()=>({version:1,holdings:[],trades:[],dividends:[],reports:[],recommendations:[],quotes:[],fx:null,cash:null,logs:[]});
 export const known=v=>typeof v==='number'&&Number.isFinite(v);
 export const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -30,6 +31,7 @@ function bytes64(a){let s='';for(let i=0;i<a.length;i+=8192)s+=String.fromCharCo
 export async function decrypt(v,password){if(v.format!=='MY-STOCK-LAB-AES256'||v.version!==1||typeof v.data!=='string'||v.data.length>14000000)throw Error('잘못된 백업');const salt=un64(v.salt),key=await derive(password,salt);const raw=await crypto.subtle.decrypt({name:'AES-GCM',iv:un64(v.iv)},key,un64(v.data));return {db:validateDB(JSON.parse(new TextDecoder().decode(raw))),key,salt};}
 
 function validateExtensions(d,fail){
+ try{validateBrokerHistory(d.brokerSnapshots);}catch{fail();}
  const str=v=>typeof v==='string'&&v.length<2000000,optionalNumber=v=>v===null||known(v);
  if(d.preferences!==undefined&&(!d.preferences||typeof d.preferences.autoRefresh!=='boolean'||typeof d.preferences.reportOnOpen!=='boolean'))fail();
  if(d.providers!==undefined){if(!d.providers||typeof d.providers!=='object')fail();for(const id of ['av','fsc']){const p=d.providers[id];if(!p||!str(p.key)||p.key.length>256||typeof p.accepted!=='boolean'||!Array.isArray(p.attempts)||p.attempts.length>1000||p.attempts.some(t=>!known(t))||!p.fetched||typeof p.fetched!=='object')fail();if(Object.values(p.fetched).some(v=>!validDate(v)))fail();if(p.cooldownUntil!==undefined&&(!known(p.cooldownUntil)||p.cooldownUntil<0))fail();}}

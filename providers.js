@@ -1,5 +1,5 @@
-import {today,known} from './core.js';
-import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js';
+import {today,known} from './core.js?v=2.1.0';
+import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js?v=2.1.0';
 export const PROVIDER_INFO={av:{name:'Alpha Vantage',url:'https://www.alphavantage.co/support/#api-key',limit:20},fsc:{name:'공공데이터포털 금융위원회',url:'https://www.data.go.kr/data/15094808/openapi.do',limit:20}};
 export async function refreshQuotes(db,{persist,active,signal,fetcher=fetch,clock=()=>Date.now(),wait=pause}={}){
  normalize(db);const out={updated:0,skipped:0,errors:[]};const stopped=new Set();
