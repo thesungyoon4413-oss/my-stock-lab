@@ -17,8 +17,13 @@ const heading=s=>/^\s*(#{1,6})\s+/.exec(s)?.[1].length||(/^\s*\*\*[^*]+\*\*\s*$/
 const starts=s=>/신규\s*(?:매수\s*)?(?:추천|투자\s*(?:후보|기회)|후보)|새로운?\s*(?:투자\s*)?(?:추천|후보)|new\s+(?:stock\s+)?(?:recommendations?|candidates?)/i.test(s);
 function ticker(line,market){const explicit=market==='KR'?[...line.matchAll(/[（(]([0-9]{6})[)）]/g)].map(x=>x[1]):[...line.matchAll(/[（(]([A-Z][A-Z0-9]{0,5}(?:[.\-][A-Z])?)[)）]/g)].map(x=>x[1]).filter(x=>!reject.has(x));if(explicit.length)return [...new Set(explicit)];const matches=market==='KR'?[...line.matchAll(/(?:^|[\s|])([0-9]{6})(?=$|[\s|])/g)].map(x=>x[1]):[...line.matchAll(/(?:^|[\s|:：])([A-Z][A-Z0-9]{0,5}(?:[.\-][A-Z])?)(?=$|[\s|:：])/g)].map(x=>x[1]).filter(x=>!reject.has(x));return [...new Set(matches)];}
 function label(line,symbol){if(line.includes('|')){const cells=line.split('|').map(clean).filter(Boolean),names=cells.filter(s=>s!==symbol&&!/[\d$%]|(?:매수|매도|추천|종가|현재가|USD|KRW)/i.test(s)&&s.length>1&&s.length<100);return names[0]||symbol;}let s=clean(line).replace(/^\s*[-*\d.)]+\s*/,'').replaceAll(symbol,'').replace(/[()（）]/g,' ').replace(/(?:현재가|종가|추천|종목코드|기업명|ticker|price|\$|USD|KRW|[\d,.]+원|\d{4}-\d{2}-\d{2})/gi,' ').replace(/\s+/g,' ').trim();return s.length>1&&s.length<=100?s:symbol;}
-function explicitPrice(lines){
- for(const line of lines){const m=clean(line).match(/(?:현재\s*(?:주가|가격)|현재가|기준가|종가|추천\s*당시\s*(?:주가|가격))\s*[:：]?\s*(?:USD\s*|KRW\s*|\$\s*|₩\s*)?([\d,]+(?:\.\d+)?)\s*(?:원|달러|USD|KRW)?/i);const d=line.match(/\b(20\d{2}-\d{2}-\d{2})\b/);if(m&&d&&date(d[1]))return {price:Number(m[1].replaceAll(',','')),priceDate:d[1],priceSource:'원본 추천 구간의 명시된 가격·기준일'};}
+function explicitPrice(lines,currency){
+ for(const line of lines){const m=clean(line).match(/(?:현재\s*(?:주가|가격)|현재가|기준가|종가|추천\s*당시\s*(?:주가|가격))\s*[:：]?\s*(USD|KRW|\$|₩)?\s*([\d,]+(?:\.\d+)?)\s*(원|달러|USD|KRW)?/i),dates=[...line.matchAll(/\b(20\d{2}-\d{2}-\d{2})\b/g)].map(x=>x[1]);
+  if(!m||new Set(dates).size!==1||!date(dates[0]))continue;
+  const unit=v=>v&&(/^(?:USD|\$|달러)$/i.test(v)?'USD':/^(?:KRW|₩|원)$/i.test(v)?'KRW':null),prefix=unit(m[1]),suffix=unit(m[3]);
+  if((!prefix&&!suffix)||(prefix&&suffix&&prefix!==suffix)||(prefix||suffix)!==currency)continue;
+  return {price:Number(m[2].replaceAll(',','')),priceDate:dates[0],priceSource:'원본 추천 구간의 명시된 통화·가격·기준일'};
+ }
  return {price:null,priceDate:null,priceSource:null};
 }
 export function reportCandidateDrafts(db){
@@ -46,7 +51,7 @@ export function reportCandidateDrafts(db){
     // table row, or the normal 'company (ticker)' notation.
     if(!heading(section[i])&&!/^\s*[-*\d.)]+\s|\|/.test(section[i])&&!/[（(][A-Z0-9.\-]+[)）]/.test(line))continue;
     let end=i+1;while(end<section.length&&end<i+16&&ticker(clean(section[end]),market).length===0)end++;
-    const excerpt=section.slice(i,end).join('\n'),price=explicitPrice(section.slice(i,end));
+    const excerpt=section.slice(i,end).join('\n'),price=explicitPrice(section.slice(i,end),market==='KR'?'KRW':'USD');
     output.push({id:report.id+'|'+symbol,reportId:report.id,reportDate:report.date,reportCreated:report.created,reportTitle:report.title,market,currency:market==='KR'?'KRW':'USD',symbol,name:label(line,symbol),excerpt,source:report.source,originalChatUrl:report.originalChatUrl||null,...price});seen.add(symbol);if(seen.size===2)break;
    }
    if(seen.size===2)break;

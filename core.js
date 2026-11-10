@@ -1,8 +1,8 @@
-import {validateInbox} from './delivery.js?v=2.5.1';
-import {validateEvidence} from './research.js?v=2.5.1';
-import {validateBrokerHistory} from './broker.js?v=2.5.1';
-import {validateStatementArchives} from './statements.js?v=2.5.1';
-import {validateTaxAllocations} from './income.js?v=2.5.1';
+import {validateInbox} from './delivery.js?v=2.5.2';
+import {validateEvidence} from './research.js?v=2.5.2';
+import {validateBrokerHistory} from './broker.js?v=2.5.2';
+import {validateStatementArchives} from './statements.js?v=2.5.2';
+import {validateTaxAllocations} from './income.js?v=2.5.2';
 export const empty=()=>({version:1,holdings:[],trades:[],dividends:[],reports:[],recommendations:[],quotes:[],fx:null,cash:null,logs:[]});
 export const known=v=>typeof v==='number'&&Number.isFinite(v);
 export const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());

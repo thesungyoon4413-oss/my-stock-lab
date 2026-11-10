@@ -1,4 +1,4 @@
-import {fundOverview} from './fund-data.js?v=2.5.1';
+import {fundOverview} from './fund-data.js?v=2.5.2';
 export function createFundUI(c){
  const {panel,table,td,esc,n,button}=c;const precise=v=>new Intl.NumberFormat('ko-KR',{maximumFractionDigits:6}).format(v);
  const link=(url,label)=>'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(label)+' ↗</a>';

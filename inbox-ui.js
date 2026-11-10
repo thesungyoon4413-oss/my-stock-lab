@@ -1,5 +1,5 @@
-import {isFundReport,mergeFundQuotes} from './fund-data.js?v=2.5.1';
-import {newInbox,connectionCode,receiveInbox} from './delivery.js?v=2.5.1';
+import {isFundReport,mergeFundQuotes} from './fund-data.js?v=2.5.2';
+import {newInbox,connectionCode,receiveInbox} from './delivery.js?v=2.5.2';
 export function createInboxUI(c){
  const {panel,button,modal,esc,toast,area}=c;let busy=false;
  function status(){const i=c.getDB().inbox;return !i?'아직 연결하지 않음':!i.enabled?'자동 받기 중지':i.lastReceived?'최근 수신 '+i.lastReceived:'받는 금고 준비됨 · 발행 연결 확인 필요';}
