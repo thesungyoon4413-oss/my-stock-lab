@@ -1,4 +1,4 @@
-import {incomeSummary,coveredReturn,taxLedger,statementAssets,allocationRevision,validateTaxAllocations} from './income.js?v=2.7.1';
+import {incomeSummary,coveredReturn,taxLedger,statementAssets,allocationRevision,validateTaxAllocations} from './income.js?v=2.8.0';
 export function createIncomeUI(c){
  const {esc,n,money,pct,panel,table,td,modal,toast,select,num,area,download}=c;
  const button=(...args)=>c.button(...args).replace('<button','<button type="button"');

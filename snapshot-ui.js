@@ -1,4 +1,4 @@
-import {validateBrokerSnapshot,brokerSummary,storeBrokerSnapshot,brokerCsv} from './broker.js?v=2.7.1';
+import {validateBrokerSnapshot,brokerSummary,storeBrokerSnapshot,brokerCsv} from './broker.js?v=2.8.0';
 export function createSnapshotUI(c){
  const {esc,n,money,pct,panel,table,td,button,modal,toast,download,area}=c;
  const history=()=>c.getDB().brokerSnapshots||[];

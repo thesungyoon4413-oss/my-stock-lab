@@ -1,5 +1,5 @@
-import {listRecoveries,readRecovery} from './recovery.js?v=2.7.1';
-import {decrypt,validateDB} from './core.js?v=2.7.1';
+import {listRecoveries,readRecovery} from './recovery.js?v=2.8.0';
+import {decrypt,validateDB} from './core.js?v=2.8.0';
 function canonical(v){return Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;}
 export async function inspectBackup(envelope,password,current){
  const {db}=await decrypt(envelope,password);
