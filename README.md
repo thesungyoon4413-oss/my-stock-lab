@@ -1,4 +1,4 @@
-# MY STOCK LAB 2.7.0
+# MY STOCK LAB 2.7.1
 
 개인 투자 기록을 기기 안에 암호화 저장하는 한국어 웹 앱입니다. 공개 저장소에는 일반 코드·수신 공개키·암호문만 두며 개인 원장·평문 보고서·금융 API 키는 게시하지 않습니다.
 
@@ -67,3 +67,5 @@ GitHub Pages 정적 호스팅과 기기 저장을 사용합니다. 운용사 자
 
 RSS 공식 안내: https://dart.fss.or.kr/introduction/content6.do
 NIKE 공식 RSS: https://investors.nike.com/news-events/press-releases/rss
+
+2.7.1은 복구점 쓰기 용량이 부족해도 이전 복구점은 계속 읽고 내보낼 수 있도록 보완했습니다. 일반 관리 버튼은 폼을 제출하지 않으며 복원은 별도 확인 절차로 수행합니다.

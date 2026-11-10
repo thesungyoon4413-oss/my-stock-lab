@@ -1,4 +1,4 @@
-import {parseCSV,validDate,known} from './core.js?v=2.7.0';
+import {parseCSV,validDate,known} from './core.js?v=2.7.1';
 const aliases={지급일:'date',종목코드:'symbol',통화:'currency',세전금액:'gross',원천징수세액:'tax',실수령액:'net',적용환율:'fx',지급상태:'status',거래번호:'payment_id',출처:'source'};
 const amount=(v,label,nullable=false)=>{if(v===undefined||v===''){if(nullable)return null;throw Error(label+' 누락');}const raw=String(v);if(!/^(?:(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?|\.\d+)$/.test(raw))throw Error(label+' 숫자 형식 오류');const n=Number(raw.replace(/,/g,''));if(!Number.isFinite(n)||n<0||n>Number.MAX_SAFE_INTEGER)throw Error(label+' 숫자 오류');return n;};
 export function dividendIdentity(d){return JSON.stringify([d.date,d.symbol.toUpperCase(),d.currency,d.gross,d.tax]);}

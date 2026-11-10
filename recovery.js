@@ -2,14 +2,14 @@
 let opening,disabled=false;
 const valid=e=>e?.format==='MY-STOCK-LAB-AES256'&&e.version===1&&typeof e.salt==='string'&&typeof e.iv==='string'&&typeof e.data==='string'&&e.data.length>20&&e.data.length<70000000;
 function database(){
- if(disabled||!globalThis.indexedDB)return Promise.reject(Error('이 브라우저의 자동 복구점 저장소를 사용할 수 없습니다'));
+ if(!globalThis.indexedDB)return Promise.reject(Error('이 브라우저의 자동 복구점 저장소를 사용할 수 없습니다'));
  if(opening)return opening;
  opening=new Promise((resolve,reject)=>{
   const request=indexedDB.open('my-stock-lab.recovery',1);let settled=false;
-  const timer=setTimeout(()=>{settled=true;disabled=true;reject(Error('자동 복구점 저장소 시간 초과'));},5000);
+  const timer=setTimeout(()=>{settled=true;opening=null;disabled=true;reject(Error('자동 복구점 저장소 시간 초과'));},5000);
   request.onupgradeneeded=()=>request.result.createObjectStore('snapshots',{keyPath:'id'});
   request.onsuccess=()=>{if(settled){request.result.close();return;}settled=true;clearTimeout(timer);request.result.onversionchange=()=>{request.result.close();opening=null;};resolve(request.result);};
-  request.onerror=()=>{if(settled)return;settled=true;clearTimeout(timer);disabled=true;reject(Error('자동 복구점 저장소 오류'));};
+  request.onerror=()=>{if(settled)return;settled=true;clearTimeout(timer);opening=null;disabled=true;reject(Error('자동 복구점 저장소 오류'));};
  });return opening;
 }
 export function retainedRecoveries(rows){
@@ -17,7 +17,7 @@ export function retainedRecoveries(rows){
  return [...sorted.filter(r=>r.kind==='daily').slice(0,3),...sorted.filter(r=>r.kind==='recent').slice(0,3)];
 }
 export async function archiveRecovery(envelope,now=new Date()){
- if(!valid(envelope))return false;
+ if(disabled||!valid(envelope))return false;
  try{
   const body=JSON.stringify(envelope),hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(body)))].map(x=>x.toString(16).padStart(2,'0')).join('');
   const date=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(now),created=now.toISOString(),db=await database();
