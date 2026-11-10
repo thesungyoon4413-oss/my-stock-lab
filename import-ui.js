@@ -1,5 +1,5 @@
-import {researchPreview,evidenceText} from './research.js?v=2.5.0';
-import {importDividends,DIVIDEND_TEMPLATE} from './dividend-import.js?v=2.5.0';
+import {researchPreview,evidenceText} from './research.js?v=2.5.1';
+import {importDividends,DIVIDEND_TEMPLATE} from './dividend-import.js?v=2.5.1';
 export function createImportUI(c){
  const {panel,button,table,td,esc,n,modal,toast,area,download}=c;
  function reportPanel(){return panel('출처가 있는 분석 보고서 가져오기',`<p>ChatGPT 등에서 확인·정리한 보고서 묶음을 기기 안에서 읽습니다. 자료 발표일·대상 기간·사실·위험·판단 근거와 원문 링크를 함께 보관합니다.</p><div class="actions">${button('분석 JSON 파일 선택','research-file')}${button('분석 JSON 붙여넣기','research-paste')}</div><input type="file" class="broker-file-input" id="research-file" accept=".json"><p class="small">외부 AI API 호출·뉴스 자동 검증은 없습니다. 새 보고서로 추가하며 이전 보고서·최초 추천은 수정하지 않습니다. 개인 파일은 공개 저장소에 올리지 마세요.</p>`);}

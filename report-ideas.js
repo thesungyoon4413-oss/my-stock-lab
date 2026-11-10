@@ -2,6 +2,16 @@
 const reject=new Set(['AI','API','USD','KRW','ETF','NAV','ROC','ROE','PER','PBR','SEC','EPS','CPI','FOMC','GDP','KST','NYSE','NASDAQ','YTD','TTM','BUY','SELL','HOLD']);
 const date=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v+'T00:00:00Z'))&&new Date(v+'T00:00:00Z').toISOString().slice(0,10)===v;
 const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+const previousDay=d=>new Date(Date.parse(d+'T00:00:00Z')-86400000).toISOString().slice(0,10);
+export function candidatePriceCutoff(draft){
+ const stamp=Date.parse(draft.reportCreated),instant=new Date(stamp),kst=Number.isFinite(stamp)?new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(instant):null;
+ if(kst!==draft.reportDate)return draft.currency==='USD'?previousDay(draft.reportDate):draft.reportDate;
+ const zone=draft.currency==='USD'?'America/New_York':'Asia/Seoul',parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(instant).map(p=>[p.type,p.value]));
+ const localDay=parts.year+'-'+parts.month+'-'+parts.day,minute=(Number(parts.hour)%24)*60+Number(parts.minute),close=draft.currency==='USD'?16*60:16*60+30;
+ // Use conservative close cutoffs. Earlier special-session closes can remain
+ // unconfirmed; a later price must never create retrospective performance.
+ return minute>=close?localDay:previousDay(localDay);
+}
 const clean=s=>s.replace(/\*\*|__|`|^\s*#{1,6}\s*/g,'').trim();
 const heading=s=>/^\s*(#{1,6})\s+/.exec(s)?.[1].length||(/^\s*\*\*[^*]+\*\*\s*$/.test(s)?2:0);
 const starts=s=>/신규\s*(?:매수\s*)?(?:추천|투자\s*(?:후보|기회)|후보)|새로운?\s*(?:투자\s*)?(?:추천|후보)|new\s+(?:stock\s+)?(?:recommendations?|candidates?)/i.test(s);
@@ -37,7 +47,7 @@ export function reportCandidateDrafts(db){
     if(!heading(section[i])&&!/^\s*[-*\d.)]+\s|\|/.test(section[i])&&!/[（(][A-Z0-9.\-]+[)）]/.test(line))continue;
     let end=i+1;while(end<section.length&&end<i+16&&ticker(clean(section[end]),market).length===0)end++;
     const excerpt=section.slice(i,end).join('\n'),price=explicitPrice(section.slice(i,end));
-    output.push({id:report.id+'|'+symbol,reportId:report.id,reportDate:report.date,reportTitle:report.title,market,currency:market==='KR'?'KRW':'USD',symbol,name:label(line,symbol),excerpt,source:report.source,originalChatUrl:report.originalChatUrl||null,...price});seen.add(symbol);if(seen.size===2)break;
+    output.push({id:report.id+'|'+symbol,reportId:report.id,reportDate:report.date,reportCreated:report.created,reportTitle:report.title,market,currency:market==='KR'?'KRW':'USD',symbol,name:label(line,symbol),excerpt,source:report.source,originalChatUrl:report.originalChatUrl||null,...price});seen.add(symbol);if(seen.size===2)break;
    }
    if(seen.size===2)break;
   }
@@ -45,14 +55,15 @@ export function reportCandidateDrafts(db){
  return output;
 }
 export function candidateBaseline(db,draft){
- if(Number.isFinite(draft.price)&&draft.price>0&&date(draft.priceDate)&&draft.priceDate<=draft.reportDate)return {price:draft.price,priceDate:draft.priceDate,source:draft.priceSource};
+ const cutoff=candidatePriceCutoff(draft);
+ if(Number.isFinite(draft.price)&&draft.price>0&&date(draft.priceDate)&&draft.priceDate<=cutoff)return {price:draft.price,priceDate:draft.priceDate,source:draft.priceSource};
  const low=new Date(draft.reportDate+'T00:00:00Z');low.setUTCDate(low.getUTCDate()-7);
- const q=(db.quotes||[]).filter(q=>q.symbol===draft.symbol&&q.currency===draft.currency&&q.date<=draft.reportDate&&q.date>=low.toISOString().slice(0,10)&&q.price>0).sort((a,b)=>b.date.localeCompare(a.date)||(b.updated||'').localeCompare(a.updated||''))[0];
+ const q=(db.quotes||[]).filter(q=>q.symbol===draft.symbol&&q.currency===draft.currency&&q.date<=cutoff&&q.date>=low.toISOString().slice(0,10)&&q.price>0).sort((a,b)=>b.date.localeCompare(a.date)||(b.updated||'').localeCompare(a.updated||''))[0];
  return q?{price:q.price,priceDate:q.date,source:q.source}:null;
 }
 export function freezeReportCandidate(db,draft,{price,priceDate,priceSource,horizon='중기'}){
  const current=reportCandidateDrafts(db).find(d=>d.id===draft.id);
- if(!current||!['단기','중기','장기'].includes(horizon)||!Number.isFinite(price)||price<=0||!date(priceDate)||priceDate>current.reportDate||typeof priceSource!=='string'||!priceSource.trim())throw Error('원본 후보·추천 기준가격·기준일·출처를 확인하세요');
+ if(!current||!['단기','중기','장기'].includes(horizon)||!Number.isFinite(price)||price<=0||!date(priceDate)||priceDate>candidatePriceCutoff(current)||typeof priceSource!=='string'||!priceSource.trim())throw Error('원본 후보·추천 시점 전에 확정된 종가·거래일·출처를 확인하세요');
  if((db.recommendations||[]).filter(r=>r.date===current.reportDate&&r.currency===current.currency).length>=2)throw Error('시장별 같은 날 추천 기록은 최대 2개입니다');
  return {id:crypto.randomUUID(),name:current.name,symbol:current.symbol,date:current.reportDate,price,priceDate,currency:current.currency,benchmark:null,benchmarkSymbol:'',horizon,source:current.source+' · 원본 보고서 '+current.reportDate,reason:'원본 보고서 추천 구간 (자동 추출 후 사용자 확인)\n'+current.excerpt+'\n\n기준 가격 출처: '+priceSource+' · '+priceDate+'\n\n원본의 위험·실패 조건·재무 수치가 부족하면 원문에서 추가 확인해야 합니다.',observations:[],revisions:[],originReportId:current.reportId,created:new Date().toISOString()};
 }

@@ -1,15 +1,15 @@
-import {createInboxUI} from './inbox-ui.js?v=2.5.0';
-import {createStatementUI} from './statement-ui.js?v=2.5.0';
-import {createIncomeUI} from './income-ui.js?v=2.5.0';
-import {createBackupUI} from './backup-ui.js?v=2.5.0';
-import {createFundUI} from './fund-ui.js?v=2.5.0';
-import {fundReportSummary,isFundReport,mergeFundQuotes} from './fund-data.js?v=2.5.0';
-import {createReportIdeasUI} from './report-ideas-ui.js?v=2.5.0';
-import {createImportUI} from './import-ui.js?v=2.5.0';
-import {createSnapshotUI} from './snapshot-ui.js?v=2.5.0';
-import {known,today,validDate,quote,krw,parseCSV} from './core.js?v=2.5.0';
-import {RELEASE,normalize,requestBudget,replayInventory,effectiveRealized,totalReturn,dividendSummary,autoObserve,buildReport,importBalances,fscQuotes,upsertQuote,invalidateInventory,rankResearch,recommendationSummary} from './lab.js?v=2.5.0';
-import {refreshQuotes,PROVIDER_INFO} from './providers.js?v=2.5.0';
+import {createInboxUI} from './inbox-ui.js?v=2.5.1';
+import {createStatementUI} from './statement-ui.js?v=2.5.1';
+import {createIncomeUI} from './income-ui.js?v=2.5.1';
+import {createBackupUI} from './backup-ui.js?v=2.5.1';
+import {createFundUI} from './fund-ui.js?v=2.5.1';
+import {fundReportSummary,isFundReport,mergeFundQuotes} from './fund-data.js?v=2.5.1';
+import {createReportIdeasUI} from './report-ideas-ui.js?v=2.5.1';
+import {createImportUI} from './import-ui.js?v=2.5.1';
+import {createSnapshotUI} from './snapshot-ui.js?v=2.5.1';
+import {known,today,validDate,quote,krw,parseCSV} from './core.js?v=2.5.1';
+import {RELEASE,normalize,requestBudget,replayInventory,effectiveRealized,totalReturn,dividendSummary,autoObserve,buildReport,importBalances,fscQuotes,upsertQuote,invalidateInventory,rankResearch,recommendationSummary} from './lab.js?v=2.5.1';
+import {refreshQuotes,PROVIDER_INFO} from './providers.js?v=2.5.1';
 export function createFeatures(c){
  const {esc,n,money,pct,button,panel,table,td,input,num,select,area,modal,toast,download}=c;
  const db=()=>normalize(c.getDB());let updating=false;const snapshots=createSnapshotUI(c);const imports=createImportUI(c);const inbox=createInboxUI(c);const statements=createStatementUI(c);const income=createIncomeUI(c);const backups=createBackupUI(c);const funds=createFundUI(c);const reportIdeas=createReportIdeasUI(c,{lookup:lookupCandidate});

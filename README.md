@@ -1,4 +1,4 @@
-# MY STOCK LAB 2.5.0
+# MY STOCK LAB 2.5.1
 
 개인 투자 기록을 기기 안에 암호화 저장하는 한국어 웹 앱입니다. 공개 저장소에는 일반 코드·수신 공개키·암호문만 두며 개인 원장·평문 보고서·금융 API 키는 게시하지 않습니다.
 
@@ -39,3 +39,5 @@ GitHub Pages 정적 호스팅과 기기 저장을 사용합니다. 운용사 자
 - GitHub Actions 무료 조건: https://docs.github.com/en/actions/concepts/billing-and-usage
 
 개인 정보·PDF·평문 원장·실제 금고 백업은 공개 저장소에 넣지 마세요.
+
+추천 기준 종가는 원본 생성 시점의 뉴욕 시간과 서머타임을 확인합니다. 미국 정규장16:00 ET, 국내는 보수적으로16:30 KST 이후 확정 종가만 같은 거래일 기준으로 허용합니다. 조기 종료·휴장일에 가격을 생성하지 않습니다. 참고: https://www.nyse.com/trade/hours-calendars
