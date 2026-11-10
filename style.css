@@ -62,3 +62,5 @@
 .etf-detail .cash-profit.negative{color:#7eabf5}.etf-detail .cash-profit.positive{color:#ed8f83}.etf-detail .cash-profit.zero{color:var(--text)}
 
 .fund-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}.fund-grid>article{min-width:0}.nav-spark{display:block;width:100%;max-height:130px;color:var(--accent,#b7ef7a)}.candidate-excerpt,.investment-note pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:.9rem;line-height:1.65}.investment-note{padding:12px 0;border-bottom:1px solid #29313d}.etf-detail .actions{flex-wrap:wrap}.fund-grid .table-scroll{max-width:100%}
+
+.financial-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;margin:14px 0}.financial-card{min-width:0;border:1px solid var(--line,#2d3643);border-radius:12px;padding:16px;background:#141c26}.financial-card h4{font-size:16px;margin:0;overflow-wrap:anywhere}.financial-card p{margin:10px 0;overflow-wrap:anywhere}.financial-card .actions{margin-bottom:0;flex-wrap:wrap}

@@ -1,7 +1,10 @@
-import {today,known} from './core.js?v=2.5.2';
-import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js?v=2.5.2';
+import {today,known} from './core.js?v=2.6.0';
+import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js?v=2.6.0';
 export const PROVIDER_INFO={av:{name:'Alpha Vantage',url:'https://www.alphavantage.co/support/#api-key',limit:20},fsc:{name:'공공데이터포털 금융위원회',url:'https://www.data.go.kr/data/15094808/openapi.do',limit:20}};
-export async function refreshQuotes(db,{persist,active,signal,fetcher=fetch,clock=()=>Date.now(),wait=pause,onlyTargets=null}={}){
+const activeProviders=new WeakSet();
+export async function withProviderLock(db,run){if(activeProviders.has(db))throw Error('무료 데이터 조회가 진행 중입니다');activeProviders.add(db);try{return await run();}finally{activeProviders.delete(db);}}
+export async function refreshQuotes(db,options={}){return withProviderLock(db,()=>runRefreshQuotes(db,options));}
+async function runRefreshQuotes(db,{persist,active,signal,fetcher=fetch,clock=()=>Date.now(),wait=pause,onlyTargets=null}={}){
  normalize(db);const out={updated:0,skipped:0,errors:[]};const stopped=new Set();
  const targets=new Map();
  if(onlyTargets!==null){if(!Array.isArray(onlyTargets)||onlyTargets.length>2||onlyTargets.some(t=>!t||typeof t.symbol!=='string'||!['USD','KRW'].includes(t.currency)))throw Error('조회할 후보 종목을 확인하세요');for(const t of onlyTargets)targets.set(t.symbol,{symbol:t.symbol,currency:t.currency});}
