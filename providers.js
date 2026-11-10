@@ -1,5 +1,5 @@
-import {today,known} from './core.js?v=2.6.0';
-import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js?v=2.6.0';
+import {today,known} from './core.js?v=2.6.1';
+import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js?v=2.6.1';
 export const PROVIDER_INFO={av:{name:'Alpha Vantage',url:'https://www.alphavantage.co/support/#api-key',limit:20},fsc:{name:'공공데이터포털 금융위원회',url:'https://www.data.go.kr/data/15094808/openapi.do',limit:20}};
 const activeProviders=new WeakSet();
 export async function withProviderLock(db,run){if(activeProviders.has(db))throw Error('무료 데이터 조회가 진행 중입니다');activeProviders.add(db);try{return await run();}finally{activeProviders.delete(db);}}
@@ -15,7 +15,7 @@ async function runRefreshQuotes(db,{persist,active,signal,fetcher=fetch,clock=()
  }
  for(const t of targets.values()){
   if(!active())break;
-  const id=t.currency==='USD'?'av':'fsc',p=db.providers[id];
+  const id=t.currency==='USD'?'av':'fsc',p=db.providers[id],requestKey=p.key;
   if(!p.accepted||!p.key||p.fetched[t.symbol]===today()){out.skipped++;continue;}
   if((id==='av'&&!/^[A-Z][A-Z0-9.\-]{0,14}$/.test(t.symbol))||(id==='fsc'&&!/^[A-Z0-9]{6}$/.test(t.symbol))){out.errors.push(t.symbol+': 종목코드 형식 확인 필요');continue;}
   if(requestBudget(p,clock())>=PROVIDER_INFO[id].limit){out.errors.push(PROVIDER_INFO[id].name+': 앱의 최근 24시간 20회 안전 한도 도달');continue;}
@@ -25,17 +25,17 @@ async function runRefreshQuotes(db,{persist,active,signal,fetcher=fetch,clock=()
   const gap=id==='av'?2000:250,last=p.attempts.length?Math.max(...p.attempts):null;
   const remaining=last===null?0:Math.max(0,last+gap-clock());
   if(remaining){try{await wait(remaining,signal);}catch{break;}}
-  if(!active()||signal?.aborted)break;
+  if(!active()||signal?.aborted||!p.accepted||p.key!==requestKey)break;
   p.attempts=p.attempts.filter(v=>v>clock()-86400000);p.attempts.push(clock());
-  await persist();if(!active())break;
+  await persist();if(!active()||!p.accepted||p.key!==requestKey)break;
   let url;
-  if(id==='av'){url=new URL('https://www.alphavantage.co/query');for(const [k,v] of Object.entries({function:'GLOBAL_QUOTE',symbol:t.symbol,apikey:p.key}))url.searchParams.set(k,v);}
-  else {url=new URL('https://apis.data.go.kr/1160100/GetStockSecuritiesInfoService_V2/getStockPriceInfo_V2');const begin=new Date();begin.setUTCDate(begin.getUTCDate()-21);let key=p.key;try{key=decodeURIComponent(key);}catch{}for(const [k,v] of Object.entries({serviceKey:key,resultType:'json',numOfRows:'100',pageNo:'1',beginBasDt:begin.toISOString().slice(0,10).replaceAll('-',''),likeSrtnCd:t.symbol}))url.searchParams.set(k,v);}
+  if(id==='av'){url=new URL('https://www.alphavantage.co/query');for(const [k,v] of Object.entries({function:'GLOBAL_QUOTE',symbol:t.symbol,apikey:requestKey}))url.searchParams.set(k,v);}
+  else {url=new URL('https://apis.data.go.kr/1160100/GetStockSecuritiesInfoService_V2/getStockPriceInfo_V2');const begin=new Date();begin.setUTCDate(begin.getUTCDate()-21);let key=requestKey;try{key=decodeURIComponent(key);}catch{}for(const [k,v] of Object.entries({serviceKey:key,resultType:'json',numOfRows:'100',pageNo:'1',beginBasDt:begin.toISOString().slice(0,10).replaceAll('-',''),likeSrtnCd:t.symbol}))url.searchParams.set(k,v);}
   try{
    const timeout=AbortSignal.timeout(15000),joined=signal&&AbortSignal.any?AbortSignal.any([signal,timeout]):timeout;
    const res=await fetcher(url,{credentials:'omit',referrerPolicy:'no-referrer',signal:joined});
    if(!res.ok){if(res.status===429){p.cooldownUntil=clock()+Math.max(65000,(Number(res.headers?.get('Retry-After'))||0)*1000);stopped.add(id);throw Error('무료 API 요청 제한으로 조회를 중지했습니다. 최소 1분 후 다시 실행하세요.');}throw Error('HTTP '+res.status);} 
-   const raw=await res.json();if(!active())break;p.lastResponse=JSON.stringify(raw).replaceAll(p.key,'[키 삭제]').replaceAll(encodeURIComponent(p.key),'[키 삭제]');
+   const raw=await res.json();if(!active()||!p.accepted||p.key!==requestKey)break;p.lastResponse=JSON.stringify(raw).replaceAll(requestKey,'[키 삭제]').replaceAll(encodeURIComponent(requestKey),'[키 삭제]');
    if(id==='av'){
     const limit=alphaLimit(raw);
     if(limit){p.cooldownUntil=clock()+limit.delay;stopped.add(id);throw Error(limit.message);}
@@ -44,7 +44,7 @@ async function runRefreshQuotes(db,{persist,active,signal,fetcher=fetch,clock=()
    if(!q)throw Error('조회된 거래일 시세가 없습니다');
    upsertQuote(db,q);p.fetched[t.symbol]=today();out.updated++;
    await persist();
-  }catch(e){if(!active())break;out.errors.push(t.symbol+': '+(e.name==='TimeoutError'?'응답 시간 초과':e instanceof TypeError?'브라우저 연결 차단·CORS·네트워크 확인 필요':String(e.message).replaceAll(p.key,'[키 삭제]').replaceAll(encodeURIComponent(p.key),'[키 삭제]')));}
+  }catch(e){if(!active()||!p.accepted||p.key!==requestKey)break;out.errors.push(t.symbol+': '+(e.name==='TimeoutError'?'응답 시간 초과':e instanceof TypeError?'브라우저 연결 차단·CORS·네트워크 확인 필요':String(e.message).replaceAll(requestKey,'[키 삭제]').replaceAll(encodeURIComponent(requestKey),'[키 삭제]')));}
  }
  return out;
 }

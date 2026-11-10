@@ -1,5 +1,5 @@
-import {financialShortlist,financialView,financialReportText,financialSymbol} from './financial-data.js?v=2.6.0';
-import {normalizeFinancials} from './fundamentals.js?v=2.6.0';
+import {financialShortlist,financialView,financialReportText,financialSymbol} from './financial-data.js?v=2.6.1';
+import {normalizeFinancials} from './fundamentals.js?v=2.6.1';
 export function createFinancialUI(c,{update,lookup,review}){
  const {esc,n,pct,button,panel,table,td,modal,input}=c,db=()=>c.getDB();
  const name=s=>db().holdings.find(h=>h.symbol===s&&h.currency==='USD')?.name||s;

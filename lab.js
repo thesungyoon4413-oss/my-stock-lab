@@ -1,9 +1,9 @@
-import {initialFinancialState,financialReportText} from './financial-data.js?v=2.6.0';
-import {isFundReport} from './fund-data.js?v=2.6.0';
-import {reviewedEvidence,evidenceText} from './research.js?v=2.6.0';
-import {known,today,validDate,quote,valuation,krw,performance} from './core.js?v=2.6.0';
-import {incomeSummary,coveredReturn} from './income.js?v=2.6.0';
-export const RELEASE='2.6.0';
+import {initialFinancialState,financialReportText} from './financial-data.js?v=2.6.1';
+import {isFundReport} from './fund-data.js?v=2.6.1';
+import {reviewedEvidence,evidenceText} from './research.js?v=2.6.1';
+import {known,today,validDate,quote,valuation,krw,performance} from './core.js?v=2.6.1';
+import {incomeSummary,coveredReturn} from './income.js?v=2.6.1';
+export const RELEASE='2.6.1';
 export function normalize(db){
  db.preferences??={autoRefresh:false,reportOnOpen:false};
  db.providers??={};
