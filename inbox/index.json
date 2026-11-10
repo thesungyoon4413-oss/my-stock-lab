@@ -1,0 +1,15 @@
+{
+  "format": "MY-STOCK-LAB-INBOX",
+  "version": 1,
+  "kid": "5d9fa528747a0633d2d0647481125e082cf236ebbcda7c83264de1009a0ea72a",
+  "items": [
+    {
+      "id": "2b0b60da25680eed60a97a5f741735b14b0c8f942f7efb2a9e285b308320d738",
+      "sha256": "6b1e09ad76959bdd6091bef4172684e9ce2a1662c41002c8858c1a5a1b64a476"
+    },
+    {
+      "id": "b5546e0deb3c3052d1ed77c49d9f65abe431e6e1022c0e51bc4871565798969e",
+      "sha256": "b87b2a72058549c8d647535164a38177d2e4ee21532b16867fbc71d61e0c6bcd"
+    }
+  ]
+}

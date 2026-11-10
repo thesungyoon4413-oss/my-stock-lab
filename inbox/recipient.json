@@ -1,0 +1,15 @@
+{
+  "format": "MY-STOCK-LAB-RECIPIENT",
+  "version": 1,
+  "kid": "5d9fa528747a0633d2d0647481125e082cf236ebbcda7c83264de1009a0ea72a",
+  "publicKey": {
+    "kty": "RSA",
+    "n": "shFSnxYWaoE6R3J-DSDo-ljpUKMMFEZFmqQDuhPaBeb7K4fqga4OijZKXZuzocg2VIe_xGWQydAZ60iGfHqLiLpNe_alzR9MwoH11aXz5Do21rLouXu_sM8Q0D7L_YSCh-UuU75efm3KOjdzz-YUk-QWcHYvkL5sAqvXuUjYJKA_jPTZ7sA_mhhP-vVTHk-FSeWcxnWOY4tYXRapuRXxM-xlM-XUkINLNZHhwfYOM_71lo7M5NMzEda8XuXUjgMPOKvdFZmS6diJSElDrEJAfMzXM0XvY07vPAtr2zsXvK5IEpu03SwnzxEY1ku3Dp5zRjF-x0RQmRbse1sx7GEe_8ptMSQzl392ysBGVw5y3rupXi_BH8NQcOl93kcwC6ewbKh0tGAi4IRWW4c8uy22LbDXri9tqVXZCRnwy7wrnN2GhF1CJ-XHYtcUV3AdbV3mX5wFBNvd-5RIZxt_1rXSqjbhdcX9H2MXCu8EjuJxIajPPAAG6uriWuPefCC36Fff",
+    "e": "AQAB",
+    "alg": "RSA-OAEP-256",
+    "ext": true,
+    "key_ops": [
+      "encrypt"
+    ]
+  }
+}
