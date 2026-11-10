@@ -1,7 +1,8 @@
-import {reviewedEvidence,evidenceText} from './research.js?v=2.4.0';
-import {known,today,validDate,quote,valuation,krw,performance} from './core.js?v=2.4.0';
-import {incomeSummary,coveredReturn} from './income.js?v=2.4.0';
-export const RELEASE='2.4.0';
+import {isFundReport} from './fund-data.js?v=2.5.0';
+import {reviewedEvidence,evidenceText} from './research.js?v=2.5.0';
+import {known,today,validDate,quote,valuation,krw,performance} from './core.js?v=2.5.0';
+import {incomeSummary,coveredReturn} from './income.js?v=2.5.0';
+export const RELEASE='2.5.0';
 export function normalize(db){
  db.preferences??={autoRefresh:false,reportOnOpen:false};
  db.providers??={};
@@ -120,7 +121,7 @@ export function buildReport(db,market,{automatic=false,now=new Date()}={}){
   if(db.reports.some(r=>r.automationKey===`${market}:${asOf}`||r.automationKey===automaticKey))return {skip:'해당 거래일 보고서가 이미 있습니다'};
  }
  const evidence=hs.map(h=>reviewedEvidence(db,h.symbol,market,asOf)).filter(Boolean);
- const previous=db.reports.filter(r=>r.market===market&&r.date<asOf).sort((a,b)=>b.date.localeCompare(a.date))[0];
+ const previous=db.reports.filter(r=>!isFundReport(r)&&r.market===market&&r.date<asOf).sort((a,b)=>b.date.localeCompare(a.date))[0];
  const decisions=hs.map(h=>({symbol:h.symbol,judgment:'판단 보류',reason:'시점이 다른 저장 근거의 최신성·전체 자료 검증 필요'}));
  const lines=[`보고서 기준 거래일: ${asOf}`,`생성: ${now.toISOString()} · ${automatic?'앱을 연 뒤 목표 시각 이후 실행':'사용자 직접 실행'} · 규칙형 분석 (AI 생성 아님)`,...valuations.map(v=>`${v.h.name} (${v.h.symbol})\n종가: ${v.q?`${v.q.price} ${v.h.currency} · 거래일 ${v.q.date} · 출처 ${v.q.source}`:'미확인'}\n등락률: ${known(v.q?.changePercent)?v.q.changePercent+'%':'미확인'}\n평가액(KRW): ${known(v.value)?v.value:'미확인'} · 평가손익: ${known(v.pnl)?v.pnl:'미확인'}\n판단: 보류. 최신 실적·공시·뉴스·수급의 독립 검증이 필요합니다.`),market==='US'?`환율: ${db.fx?`${db.fx.rate} KRW/USD · ${db.fx.date} · ${db.fx.source}`:'미확인'}\n주요 지수·연준·고용·물가·산업 동향: 검증 자료 없음`:'공시·분기/연간 실적·외국인/기관·업종/정책: 검증 자료 없음',`이전 보고서: ${previous?previous.date+' '+previous.title:'없음'}`,previous?.decisions?'이전 자동 판단과 비교: 판단 보류 유지. 새로운 검증 근거가 없어 변경하지 않음.':'이전 판단 자동 비교: 구조화된 이전 판단 없음. 보관함에서 원문 확인 필요.','신규 종목: 오늘은 신규 매수 추천 없음','위험: 미확인 매수가, 자료 기준일 차이, 달러 환율, 커버드콜 ETF 원금 잠식 가능성. 분배금과 투자 수익은 다릅니다.','최종 결론: 신규 매매 판단 보류. 현금 보유액·종목 편중과 원금 변동 위험을 점검하세요.'];
  if(evidence.length)lines.push('저장된 분석 근거 (발표일·검토일 기준, 자동 최신 검증 아님)',...evidence.map(e=>evidenceText(e)+(new Date(asOf)-new Date(e.reviewDate)>30*86400000?'\n주의: 검토 후 30일이 지난 자료입니다. 새 공시·뉴스를 확인하세요.':'')));

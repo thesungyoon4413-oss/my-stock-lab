@@ -1,11 +1,15 @@
-import {today,known} from './core.js?v=2.4.0';
-import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js?v=2.4.0';
+import {today,known} from './core.js?v=2.5.0';
+import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js?v=2.5.0';
 export const PROVIDER_INFO={av:{name:'Alpha Vantage',url:'https://www.alphavantage.co/support/#api-key',limit:20},fsc:{name:'공공데이터포털 금융위원회',url:'https://www.data.go.kr/data/15094808/openapi.do',limit:20}};
-export async function refreshQuotes(db,{persist,active,signal,fetcher=fetch,clock=()=>Date.now(),wait=pause}={}){
+export async function refreshQuotes(db,{persist,active,signal,fetcher=fetch,clock=()=>Date.now(),wait=pause,onlyTargets=null}={}){
  normalize(db);const out={updated:0,skipped:0,errors:[]};const stopped=new Set();
  const targets=new Map();
- for(const h of db.holdings)if(h.qty>0&&h.verified!==false)targets.set(h.symbol,{symbol:h.symbol,currency:h.currency});
- for(const r of db.recommendations){targets.set(r.symbol,{symbol:r.symbol,currency:r.currency});if(r.benchmarkSymbol)targets.set(r.benchmarkSymbol,{symbol:r.benchmarkSymbol,currency:r.currency});}
+ if(onlyTargets!==null){if(!Array.isArray(onlyTargets)||onlyTargets.length>2||onlyTargets.some(t=>!t||typeof t.symbol!=='string'||!['USD','KRW'].includes(t.currency)))throw Error('조회할 후보 종목을 확인하세요');for(const t of onlyTargets)targets.set(t.symbol,{symbol:t.symbol,currency:t.currency});}
+ else{
+  const underlying={GOOY:'GOOGL',NVDY:'NVDA',TSLY:'TSLA'};
+  for(const h of db.holdings)if(h.qty>0&&h.verified!==false){targets.set(h.symbol,{symbol:h.symbol,currency:h.currency});if(h.currency==='USD'&&underlying[h.symbol])targets.set(underlying[h.symbol],{symbol:underlying[h.symbol],currency:'USD'});}
+  for(const r of db.recommendations){targets.set(r.symbol,{symbol:r.symbol,currency:r.currency});if(r.benchmarkSymbol)targets.set(r.benchmarkSymbol,{symbol:r.benchmarkSymbol,currency:r.currency});}
+ }
  for(const t of targets.values()){
   if(!active())break;
   const id=t.currency==='USD'?'av':'fsc',p=db.providers[id];

@@ -1,7 +1,7 @@
 """Publish ciphertext to the single approved repository using connected GitHub CLI auth.
 No device-login flow, token persistence, plaintext reports, or private keys here.
 """
-import argparse,base64,hashlib,json,re,subprocess,sys
+import argparse,base64,hashlib,json,os,re,subprocess,sys
 from pathlib import Path
 BASE='repos/thesungyoon4413-oss/my-stock-lab'
 HEX=re.compile(r'^[a-f0-9]{64}$')
@@ -34,15 +34,19 @@ def fetch_json(path,parent,request=api):
  except NotFound:return None
  if v.get('encoding')!='base64':raise ValueError('Unexpected remote file encoding')
  return json.loads(base64.b64decode(v['content']))
-def publish(directory,recipient_value,request=api):
+def publish(directory,recipient_value,request=api,*,github_actions=False):
  directory=Path(directory);public=recipient(recipient_value)
  if not directory.is_dir() or any(not p.is_file() or p.is_symlink() or (p.name!='index.json' and not re.fullmatch(r'[a-f0-9]{64}\.json',p.name)) for p in directory.iterdir()):raise ValueError('Only ciphertext files and index.json may be published')
  index=manifest(json.loads((directory/'index.json').read_text()))
  if index['kid']!=public['kid']:raise ValueError('Recipient and inbox differ')
- user=request('user')
- if user.get('login')!='thesungyoon4413-oss':raise ValueError('Wrong connected GitHub account')
+ if github_actions:
+  if os.environ.get('GITHUB_ACTIONS')!='true' or os.environ.get('GITHUB_REPOSITORY')!='thesungyoon4413-oss/my-stock-lab' or os.environ.get('GITHUB_REF')!='refs/heads/main' or os.environ.get('GITHUB_EVENT_NAME') not in ['schedule','workflow_dispatch']:raise ValueError('Approved repository Actions context required')
+ else:
+  user=request('user')
+  if user.get('login')!='thesungyoon4413-oss':raise ValueError('Wrong connected GitHub account')
  repo=request(BASE)
  if repo.get('private') or repo.get('default_branch')!='main':raise ValueError('Existing approved public Pages repository required')
+ if github_actions and (repo.get('full_name')!='thesungyoon4413-oss/my-stock-lab' or str(repo.get('id'))!=os.environ.get('GITHUB_REPOSITORY_ID')):raise ValueError('Repository token identity mismatch')
  ref=request(BASE+'/git/ref/heads/main');parent=ref['object']['sha']
  old=fetch_json('inbox/index.json',parent,request);old_recipient=fetch_json('inbox/recipient.json',parent,request)
  if old_recipient and recipient(old_recipient)['kid']!=public['kid']:raise ValueError('Cannot replace a different recipient key')
