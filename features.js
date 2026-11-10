@@ -1,10 +1,10 @@
-import {createInboxUI} from './inbox-ui.js?v=2.3.0';
-import {createStatementUI} from './statement-ui.js?v=2.3.0';
-import {createImportUI} from './import-ui.js?v=2.3.0';
-import {createSnapshotUI} from './snapshot-ui.js?v=2.3.0';
-import {known,today,validDate,quote,krw,parseCSV} from './core.js?v=2.3.0';
-import {RELEASE,normalize,requestBudget,replayInventory,effectiveRealized,totalReturn,dividendSummary,autoObserve,buildReport,importBalances,fscQuotes,upsertQuote,invalidateInventory,rankResearch} from './lab.js?v=2.3.0';
-import {refreshQuotes,PROVIDER_INFO} from './providers.js?v=2.3.0';
+import {createInboxUI} from './inbox-ui.js?v=2.3.1';
+import {createStatementUI} from './statement-ui.js?v=2.3.1';
+import {createImportUI} from './import-ui.js?v=2.3.1';
+import {createSnapshotUI} from './snapshot-ui.js?v=2.3.1';
+import {known,today,validDate,quote,krw,parseCSV} from './core.js?v=2.3.1';
+import {RELEASE,normalize,requestBudget,replayInventory,effectiveRealized,totalReturn,dividendSummary,autoObserve,buildReport,importBalances,fscQuotes,upsertQuote,invalidateInventory,rankResearch} from './lab.js?v=2.3.1';
+import {refreshQuotes,PROVIDER_INFO} from './providers.js?v=2.3.1';
 export function createFeatures(c){
  const {esc,n,money,pct,button,panel,table,td,input,num,select,area,modal,toast,download}=c;
  const db=()=>normalize(c.getDB());let updating=false;const snapshots=createSnapshotUI(c);const imports=createImportUI(c);const inbox=createInboxUI(c);const statements=createStatementUI(c);

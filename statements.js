@@ -55,9 +55,8 @@ export async function statementPreview(raw,db){
 export async function applyStatement(plan,db,{updateAverages=false}={}){
  if(JSON.stringify(db.holdings)!==plan.holdingsSignature)throw Error('보유 현황이 바뀌었습니다. 미리보기를 다시 여세요');
  const fresh=await statementPreview(plan.package,db);if(fresh.id!==plan.id||fresh.digest!==plan.digest)fail();
- if(fresh.duplicate)return {added:false,updated:0};
  const now=new Date().toISOString();let updated=0;
- if(updateAverages)for(const row of fresh.changes.filter(x=>x.eligible)){const h=db.holdings.find(x=>x.id===row.holdingId);h.avg=row.average;h.averageSource={statementId:plan.id,date:plan.package.periodEnd,basis:'증명서 거래내역의 이동평균·비용 제외; 증권사 표시 평균가 아님'};updated++;}
- db.statementArchives??=[];db.statementArchives.push({id:plan.id,digest:plan.digest,importedAt:now,package:structuredClone(plan.package)});
- return {added:true,updated};
+ if(updateAverages)for(const row of fresh.changes.filter(x=>x.eligible)){const h=db.holdings.find(x=>x.id===row.holdingId);if(h.avg===row.average&&h.averageSource?.statementId===plan.id)continue;h.avg=row.average;h.averageSource={statementId:plan.id,date:plan.package.periodEnd,basis:'증명서 거래내역의 이동평균·비용 제외; 증권사 표시 평균가 아님'};updated++;}
+ if(!fresh.duplicate){db.statementArchives??=[];db.statementArchives.push({id:plan.id,digest:plan.digest,importedAt:now,package:structuredClone(plan.package)});}
+ return {added:!fresh.duplicate,updated};
 }
