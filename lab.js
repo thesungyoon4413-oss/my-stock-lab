@@ -1,6 +1,6 @@
-import {reviewedEvidence,evidenceText} from './research.js?v=2.2.0';
-import {known,today,validDate,quote,valuation,krw} from './core.js?v=2.2.0';
-export const RELEASE='2.2.0';
+import {reviewedEvidence,evidenceText} from './research.js?v=2.3.0';
+import {known,today,validDate,quote,valuation,krw} from './core.js?v=2.3.0';
+export const RELEASE='2.3.0';
 export function normalize(db){
  db.preferences??={autoRefresh:false,reportOnOpen:false};
  db.providers??={};
