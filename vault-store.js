@@ -1,4 +1,6 @@
 // Preserve v1 local vaults; expand to IndexedDB only when the small store fills up.
+import {archiveRecovery} from './recovery.js?v=2.7.0';
+let latestKnown=null;
 const STORE='my-stock-lab.v1',REVISION='my-stock-lab.revision';let primary=false,opening;
 const legacy=()=>{try{const raw=localStorage.getItem(STORE);return raw?JSON.parse(raw):null;}catch{throw Error('기기 저장소를 읽을 수 없습니다');}};
 function database(){
@@ -15,14 +17,15 @@ async function writePrimary(envelope){const db=await database();return new Promi
 const isEnvelope=v=>v?.format==='MY-STOCK-LAB-AES256'&&v.version===1&&typeof v.data==='string';
 export async function readEnvelope(){
  let value=null,problem=null;try{value=await readPrimary();}catch(e){problem=e;}
- if(value){if(!isEnvelope(value))throw Error('대용량 금고 형식 오류 · 백업을 확인하세요');primary=true;return value;}
+ if(value){if(!isEnvelope(value))throw Error('대용량 금고 형식 오류 · 백업을 확인하세요');primary=true;latestKnown=value;return value;}
  const old=legacy();if(old?.format==='MY-STOCK-LAB-IDB')throw problem||Error('대용량 금고를 찾을 수 없습니다 · 백업을 확인하세요');
- if(old&&!isEnvelope(old))throw Error('기존 금고 형식 오류 · 백업을 확인하세요');primary=false;return old;
+ if(old&&!isEnvelope(old))throw Error('기존 금고 형식 오류 · 백업을 확인하세요');primary=false;latestKnown=old;return old;
 }
 export async function writeEnvelope(envelope){
  if(!isEnvelope(envelope))throw Error('암호화 금고 형식 오류');
- if(!primary){try{localStorage.setItem(STORE,JSON.stringify(envelope));return envelope;}catch{/* Expand only after an actual small-store write failure. */}}
+ const previous=latestKnown;const recovered=async()=>{latestKnown=envelope;await archiveRecovery(previous||envelope);};
+ if(!primary){try{localStorage.setItem(STORE,JSON.stringify(envelope));await recovered();return envelope;}catch{/* Expand only after an actual small-store write failure. */}}
  await writePrimary(envelope);primary=true;
  try{localStorage.setItem(STORE,JSON.stringify({format:'MY-STOCK-LAB-IDB',version:1}));localStorage.setItem(REVISION,crypto.randomUUID());}catch{/* Encrypted primary write has already committed. */}
- return envelope;
+ await recovered();return envelope;
 }

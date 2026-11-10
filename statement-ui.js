@@ -1,4 +1,4 @@
-import {statementPreview,applyStatement} from './statements.js?v=2.6.1';
+import {statementPreview,applyStatement} from './statements.js?v=2.7.0';
 export function createStatementUI(c){
  const {esc,n,panel,table,td,modal,toast,input}=c;let filter='';
  const button=(...args)=>c.button(...args).replace('<button','<button type="button"');

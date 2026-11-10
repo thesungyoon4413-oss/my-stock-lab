@@ -1,0 +1,25 @@
+name: Encrypted official disclosures and issuer news
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '43 22 * * *'
+    - cron: '43 7 * * 1-5'
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: official-notice-facts
+  cancel-in-progress: false
+jobs:
+  collect:
+    if: github.repository == 'thesungyoon4413-oss/my-stock-lab' && github.event.repository.visibility == 'public' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Read official RSS and publish ciphertext only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 relay/refresh-notices.py --github-actions

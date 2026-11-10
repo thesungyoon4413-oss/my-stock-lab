@@ -1,5 +1,5 @@
-import {today,known} from './core.js?v=2.6.1';
-import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js?v=2.6.1';
+import {today,known} from './core.js?v=2.7.0';
+import {normalize,alphaQuote,fscQuotes,upsertQuote,requestBudget} from './lab.js?v=2.7.0';
 export const PROVIDER_INFO={av:{name:'Alpha Vantage',url:'https://www.alphavantage.co/support/#api-key',limit:20},fsc:{name:'공공데이터포털 금융위원회',url:'https://www.data.go.kr/data/15094808/openapi.do',limit:20}};
 const activeProviders=new WeakSet();
 export async function withProviderLock(db,run){if(activeProviders.has(db))throw Error('무료 데이터 조회가 진행 중입니다');activeProviders.add(db);try{return await run();}finally{activeProviders.delete(db);}}

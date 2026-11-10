@@ -1,0 +1,21 @@
+name: Synthetic WebKit compatibility check
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  webkit:
+    if: github.repository == 'thesungyoon4413-oss/my-stock-lab' && github.event.repository.visibility == 'public' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Install pinned free browser test tools
+        run: |
+          python3 -m venv .qa-venv
+          .qa-venv/bin/pip install playwright==1.62.0
+          .qa-venv/bin/python -m playwright install --with-deps webkit
+      - name: Check synthetic vault and mobile WebKit layouts
+        run: .qa-venv/bin/python relay/webkit-check.py

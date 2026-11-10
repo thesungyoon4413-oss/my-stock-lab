@@ -27,7 +27,7 @@ function explicitPrice(lines,currency){
  return {price:null,priceDate:null,priceSource:null};
 }
 export function reportCandidateDrafts(db){
- const reports=(db.reports||[]).filter(r=>date(r.date)&&r.date<=today()&&['KR','US'].includes(r.market)&&typeof r.body==='string'&&r.body.length<=200000&&!/규칙형/.test(r.source)&&!r.body.includes('"MY-STOCK-LAB-OFFICIAL-FUNDS"')).sort((a,b)=>b.date.localeCompare(a.date)||(b.created||'').localeCompare(a.created||''));
+ const reports=(db.reports||[]).filter(r=>date(r.date)&&r.date<=today()&&['KR','US'].includes(r.market)&&typeof r.body==='string'&&r.body.length<=200000&&!/규칙형/.test(r.source)&&!r.body.includes('"MY-STOCK-LAB-OFFICIAL-FUNDS"')&&!r.body.includes('"MY-STOCK-LAB-OFFICIAL-NOTICES"')).sort((a,b)=>b.date.localeCompare(a.date)||(b.created||'').localeCompare(a.created||''));
  const output=[];
  for(const market of ['KR','US']){
   // The latest report with an explicit section controls the day. An explicit 'none'

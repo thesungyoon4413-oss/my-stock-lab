@@ -1,7 +1,7 @@
-import {today} from './core.js?v=2.6.1';
-import {normalize,requestBudget,alphaQuote,upsertQuote} from './lab.js?v=2.6.1';
-import {alphaLimit,withProviderLock} from './providers.js?v=2.6.1';
-import {initialFinancialState,financialSymbol,FINANCIAL_KINDS,parseFinancialResponse} from './financial-data.js?v=2.6.1';
+import {today} from './core.js?v=2.7.0';
+import {normalize,requestBudget,alphaQuote,upsertQuote} from './lab.js?v=2.7.0';
+import {alphaLimit,withProviderLock} from './providers.js?v=2.7.0';
+import {initialFinancialState,financialSymbol,FINANCIAL_KINDS,parseFinancialResponse} from './financial-data.js?v=2.7.0';
 export function normalizeFinancials(db){db.financials??=initialFinancialState();return db.financials;}
 const excluded=new Set(['GOOY','NVDY','TSLY','SOXL','SPCX']);
 export function financialTargets(db){
