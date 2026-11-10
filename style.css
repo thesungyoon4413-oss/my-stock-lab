@@ -58,3 +58,5 @@
 .broker-note{margin-top:9px;padding-top:8px;border-top:1px dashed var(--line);white-space:normal;color:#a7b8c8}
 
 .evidence-links a{overflow-wrap:anywhere}.evidence-links small{display:block;color:var(--muted);margin-top:.3rem}details summary{cursor:pointer;padding:12px 0}dialog details pre{max-height:45vh;overflow:auto}
+
+.etf-detail .cash-profit.negative{color:#7eabf5}.etf-detail .cash-profit.positive{color:#ed8f83}.etf-detail .cash-profit.zero{color:var(--text)}
