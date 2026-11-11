@@ -30,6 +30,10 @@
     {
       "id": "34a8f0d72d79adb566a04a7c2253217dd8d35c0090c72a8607379d288921b85a",
       "sha256": "e596450f3f75922bbcc8ae7803866f9e0e071fbcb1dda0e06fa28ba8e247e0ba"
+    },
+    {
+      "id": "8bee2004c3ccfa51500a2e6403a0a94be82e0c421694b86e6d994ec23277e3bc",
+      "sha256": "bcbb1a216b878e9df7f1938bb786e1f7ef60790a0c8ed568154d7be3a73471ff"
     }
   ]
 }
