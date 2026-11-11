@@ -26,6 +26,10 @@
     {
       "id": "dd9da9df2fe88e1b949a11af2dba1de8edb5a5ebeaa3732a348680d480a5e936",
       "sha256": "1bff50526a9b58e0189fbfde80f84bd8d449332e7185011ead9c5fb7f94dff2e"
+    },
+    {
+      "id": "34a8f0d72d79adb566a04a7c2253217dd8d35c0090c72a8607379d288921b85a",
+      "sha256": "e596450f3f75922bbcc8ae7803866f9e0e071fbcb1dda0e06fa28ba8e247e0ba"
     }
   ]
 }
