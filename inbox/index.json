@@ -50,6 +50,10 @@
     {
       "id": "f5dd7ad6c2a3b112da631a61cefe96fac5e7ed5a7728a7eb7025c1332179a16d",
       "sha256": "ff68d2e67d6d10f0d3762580d17efd95ff765f305ff53b756e9423de0258c80d"
+    },
+    {
+      "id": "51a0baa8ad44e7ea5ec68ff72e29e5567f929d8c10ac4d42cd64662589439dce",
+      "sha256": "597bbc1e987115045865531a4ef57bc1ae11a2dc0425e75b7a63e0b1af2780b5"
     }
   ]
 }
