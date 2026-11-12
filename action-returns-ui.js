@@ -1,5 +1,5 @@
-import {parseCSV,today} from './core.js?v=2.8.0';
-import {createActionReview,appendActionReview,reviewedReturns,baselineMatches,reviewableThrough} from './action-returns.js?v=2.8.0';
+import {parseCSV,today} from './core.js?v=2.9.0';
+import {createActionReview,appendActionReview,reviewedReturns,baselineMatches,reviewableThrough} from './action-returns.js?v=2.9.0';
 const HEADER='symbol,type,date,currency,amount,newShares,oldShares,payDate,source,note';
 const cell=v=>'"'+String(v??'').replaceAll('"','""')+'"';
 const csv=events=>HEADER+'\n'+events.map(e=>['symbol','type','date','currency','amount','newShares','oldShares','payDate','source','note'].map(k=>cell(e[k])).join(',')).join('\n');

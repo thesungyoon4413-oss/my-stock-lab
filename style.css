@@ -66,3 +66,5 @@
 .financial-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;margin:14px 0}.financial-card{min-width:0;border:1px solid var(--line,#2d3643);border-radius:12px;padding:16px;background:#141c26}.financial-card h4{font-size:16px;margin:0;overflow-wrap:anywhere}.financial-card p{margin:10px 0;overflow-wrap:anywhere}.financial-card .actions{margin-bottom:0;flex-wrap:wrap}
 
 .financial-card .actions button{min-height:44px;font-size:13px;padding:8px 12px}
+
+.cloud-working{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#0b111ae8;color:#b9ef84;padding:30px;text-align:center;font-weight:600}

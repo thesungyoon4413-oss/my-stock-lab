@@ -1,5 +1,5 @@
 // Preserve v1 local vaults; expand to IndexedDB only when the small store fills up.
-import {archiveRecovery} from './recovery.js?v=2.8.0';
+import {archiveRecovery} from './recovery.js?v=2.9.0';
 let latestKnown=null;
 const STORE='my-stock-lab.v1',REVISION='my-stock-lab.revision';let primary=false,opening;
 const legacy=()=>{try{const raw=localStorage.getItem(STORE);return raw?JSON.parse(raw):null;}catch{throw Error('기기 저장소를 읽을 수 없습니다');}};
