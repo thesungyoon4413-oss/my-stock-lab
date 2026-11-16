@@ -94,6 +94,10 @@
     {
       "id": "f9917dc084ebec5a8b9a675b95ef853e2846341279b74d8dc15cb1edb0904f0a",
       "sha256": "4a85414701da23e319faeebd0f6b519c5268b6812607c83da7b75d6578e73a92"
+    },
+    {
+      "id": "1ee8f077f31995a511dcfcb730170b7ae37cf1911f8cbaecf2004cde5b7c00cd",
+      "sha256": "cb91082ad3c6d17c6a6c5d1bd7b108c409f48c87bad8e62f9a0acd601fd381ef"
     }
   ]
 }
