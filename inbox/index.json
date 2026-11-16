@@ -98,6 +98,10 @@
     {
       "id": "1ee8f077f31995a511dcfcb730170b7ae37cf1911f8cbaecf2004cde5b7c00cd",
       "sha256": "cb91082ad3c6d17c6a6c5d1bd7b108c409f48c87bad8e62f9a0acd601fd381ef"
+    },
+    {
+      "id": "187937f13f86be561125ed320230290f2f172f6baf0cd665eb1c7b61adc854ee",
+      "sha256": "8c91861c32f59a7dbb80637694d33de417ae289f255d9e7abe6a7ec52a6208be"
     }
   ]
 }
