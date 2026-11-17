@@ -102,6 +102,10 @@
     {
       "id": "187937f13f86be561125ed320230290f2f172f6baf0cd665eb1c7b61adc854ee",
       "sha256": "8c91861c32f59a7dbb80637694d33de417ae289f255d9e7abe6a7ec52a6208be"
+    },
+    {
+      "id": "cb0d58e46f5c2208b2637275c4f9a659fdcecf5249063390675fefff1b8011c9",
+      "sha256": "e10843a03d383aa5aa1f88caddec31a128a79d8414fe7716f7ea0ce2ae563df9"
     }
   ]
 }
