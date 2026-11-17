@@ -114,6 +114,10 @@
     {
       "id": "c33da2be52d06910fdb50e2a461eb490c52dc6115a67a529e1b9c98fe2197e0c",
       "sha256": "cc8ba7bb514ff6643fdb87d66e75043792b1960f65fb2fa4ffe0c6a0806a3821"
+    },
+    {
+      "id": "dac548493f47dce195a98adbf3770b601cad8b7d6bb7069f381a6f2636d5545f",
+      "sha256": "aa10470ea0b9ac35049fb80cad0b9b6a9494269703b857ee65080f2e8724c7da"
     }
   ]
 }
