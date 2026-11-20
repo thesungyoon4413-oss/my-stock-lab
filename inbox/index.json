@@ -178,6 +178,10 @@
     {
       "id": "dcb4b504d67cc990e6878afac109a82718f89eb8c8ed6423f923ae809eb1a228",
       "sha256": "d74e1dbbd4c45e1fd671da7b822dd2763c065c496416f53b3da586083f6039e8"
+    },
+    {
+      "id": "cf77bc235732dfd334d10a1523b9d3fa55b4239c17f3acfeafbf78279a8bbc41",
+      "sha256": "5cc59d57455f4181d5eaaa96a305183b192285d55a902d2f114570c5fe88ef52"
     }
   ]
 }
