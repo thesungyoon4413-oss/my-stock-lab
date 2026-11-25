@@ -250,6 +250,10 @@
     {
       "id": "844e780dadf081b5c52550fc528ff0da9ba8bb36d7ae92144f07637154c30fc4",
       "sha256": "122b75bb2ec161d599342925ac27160d0e013cd08ccc02bfd2b08be1436e432a"
+    },
+    {
+      "id": "f6113f13900bbb7585b95bbd8c8a9b97fe827fa4194c6dbbae5b2940fd782bf7",
+      "sha256": "4a8c8c4a9ab16b2b2335f8627a51c6bc5ae71d004d1431a7c3ac0b329b271d4d"
     }
   ]
 }
