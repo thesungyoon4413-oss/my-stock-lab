@@ -246,6 +246,10 @@
     {
       "id": "fd6e588fb1c98f6ca30955f27ef877aaa5c5691cf008c45f5c229579d17e7d51",
       "sha256": "ccc2957e72f73aa580aee3cab2ac5df7216d7b5e404adcb3481868b45760870a"
+    },
+    {
+      "id": "844e780dadf081b5c52550fc528ff0da9ba8bb36d7ae92144f07637154c30fc4",
+      "sha256": "122b75bb2ec161d599342925ac27160d0e013cd08ccc02bfd2b08be1436e432a"
     }
   ]
 }
