@@ -262,6 +262,10 @@
     {
       "id": "93e96a2a7fa61a11cebd0faf69fe151596005d08a627e71ad58dea5fba0fae68",
       "sha256": "c0a7776f3f4b8b99d1043813e3d212a40ddd31ab39ee1e8add49515733a78e7d"
+    },
+    {
+      "id": "9152ee1a2e8c8c4627b60efd4198d172082b06c32f44be7995ba8fe038d66f15",
+      "sha256": "fa2eb4608b15880e3fca17aeb094c11f0106d058f0a4ec2e9814b2cd20e4ad42"
     }
   ]
 }
